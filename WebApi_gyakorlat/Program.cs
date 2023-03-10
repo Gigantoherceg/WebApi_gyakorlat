@@ -12,9 +12,10 @@ namespace WebApi_gyakorlat
 
             // Add services to the container.
             string connectionString = builder.Configuration.GetConnectionString("Default") ?? throw new InvalidOperationException("No connectionString");
-            builder.Services.AddDbContext < GyakDbContext > (options => options.UseSqlServer(connectionString));
+            builder.Services.AddDbContext<GyakDbContext>(options => options.UseSqlServer(connectionString));
 
-            builder.Services.AddIdentityCore<ApplicationUser>(options => {
+            builder.Services.AddIdentityCore<ApplicationUser>(options =>
+            {
                 options.SignIn.RequireConfirmedAccount = false;
                 options.User.RequireUniqueEmail = true;
                 options.Password.RequireDigit = false;
@@ -23,7 +24,7 @@ namespace WebApi_gyakorlat
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
             })
-                            .AddEntityFrameworkStores < GyakDbContext > ();
+                            .AddEntityFrameworkStores<GyakDbContext>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -47,7 +48,7 @@ namespace WebApi_gyakorlat
             app.MapControllers();
 
             using (var scope = app.Services.CreateScope())
-            using (var context = scope.ServiceProvider.GetRequiredService < GyakDbContext > ())
+            using (var context = scope.ServiceProvider.GetRequiredService<GyakDbContext>())
             {
                 await context.Database.MigrateAsync();
             }
