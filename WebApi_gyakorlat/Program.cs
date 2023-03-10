@@ -1,6 +1,10 @@
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using WebApi_gyakorlat.Models;
+using WebApi_gyakorlat.Services;
 
 namespace WebApi_gyakorlat
 {
@@ -9,6 +13,21 @@ namespace WebApi_gyakorlat
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddScoped<ITokenCreationService, JwtService>();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                            .AddJwtBearer(options => {
+                                options.TokenValidationParameters = new TokenValidationParameters()
+                                {
+                                    ValidateIssuer = true,
+                                    ValidateAudience = true,
+                                    ValidateLifetime = true,
+                                    ValidateIssuerSigningKey = true,
+                                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty))
+                                };
+                            });
 
             // Add services to the container.
             string connectionString = builder.Configuration.GetConnectionString("Default") ?? throw new InvalidOperationException("No connectionString");
@@ -42,6 +61,7 @@ namespace WebApi_gyakorlat
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

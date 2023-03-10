@@ -1,21 +1,22 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using WebApi_gyakorlat.Models;
+using WebApi_gyakorlat.Models.ViewModel;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebApi_gyakorlat.Models;
+using WebApi_gyakorlat.Services;
 
 namespace WebApi_gyakorlat.Controllers
 {
-    public class UsersController
+    [Route("api/[controller]")]
+    [ApiController]
+    public class UsersController : ControllerBase
     {
-        [Route("api/[controller]")]
-        [ApiController]
-        public class UsersController : ControllerBase
-        {
-            private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ITokenCreationService _jwtService;
 
-            public UsersController(UserManager<ApplicationUser> userManager)
-            {
-                _userManager = userManager;
-            }
+        public UsersController(UserManager<ApplicationUser> userManager, ITokenCreationService jwtService)
+        {
+            _userManager = userManager;
+            _jwtService = jwtService;
         }
 
         // POST: api/Users
@@ -55,9 +56,36 @@ namespace WebApi_gyakorlat.Controllers
             return new UserDetails
             {
                 UserName = user.UserName ?? string.Empty,
-                Email = user.Email ?? string.Empty,
-                //Goal= user.Goal ?? string.Empty
+                Email = user.Email ?? string.Empty
             };
+        }
+
+        // POST: api/Users/BearerToken
+        [HttpPost("BearerToken")]
+        public async Task<ActionResult<AuthenticationResponse>> CreateBearerToken(AuthenticationRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Bad credentials");
+            }
+
+            var user = await _userManager.FindByNameAsync(request.UserName);
+
+            if (user == null)
+            {
+                return BadRequest("Bad credentials");
+            }
+
+            var isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+
+            if (!isPasswordValid)
+            {
+                return BadRequest("Bad credentials");
+            }
+
+            var token = _jwtService.CreateToken(user);
+
+            return Ok(token);
         }
     }
 }
