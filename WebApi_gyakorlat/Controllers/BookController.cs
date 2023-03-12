@@ -49,36 +49,22 @@ namespace WebApi_gyakorlat.Controllers
         //    return book;
         //}
 
-        //// PUT: api/Books/5
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutBook(string id, Book book)
-        //{
-        //    if (id != book.BookId)
-        //    {
-        //        return BadRequest();
-        //    }
+        // PUT: api/Books/title
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut(nameof(PutBook)+"/{title}")]
+        public async Task<IActionResult> PutBook(string title, BookView bookView)
+        {
+            try
+            {
+                await _bookService.PutBookAsync(title, bookView);
+            }
+            catch (InvalidDataException e)
+            {
 
-        //    _context.Entry(book).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!BookExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
+                return BadRequest(e.Message);
+            }
+            return Ok("A módisítás sikeres!");
+        }
 
         // POST: api/Books
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -97,25 +83,17 @@ namespace WebApi_gyakorlat.Controllers
             return Ok("A mentés sikeres!");
         }
 
-        //// DELETE: api/Books/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteBook(string id)
-        //{
-        //    if (_context.Books == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    var book = await _context.Books.FindAsync(id);
-        //    if (book == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Books.Remove(book);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
+        // DELETE: api/Books/5
+        [HttpDelete(nameof(DeleteBook)+"/{title}")]
+        public async Task<IActionResult> DeleteBook(string title)
+        {
+            var isDeleted = await _bookService.DeleteBookByTitleAsync(title);
+            if (isDeleted)
+            {
+                return Ok("Sikeres törlés.");
+            }
+            return BadRequest("A könyv nem létezik az adatbázisban.");
+        }
 
         //private bool BookExists(string id)
         //{
