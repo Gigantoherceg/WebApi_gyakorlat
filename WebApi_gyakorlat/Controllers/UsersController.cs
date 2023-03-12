@@ -1,7 +1,8 @@
-﻿using WebApi_gyakorlat.Models;
-using WebApi_gyakorlat.Models.ViewModel;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebApi_gyakorlat.Models;
+using WebApi_gyakorlat.Models.ViewModel;
 using WebApi_gyakorlat.Services;
 
 namespace WebApi_gyakorlat.Controllers
@@ -20,16 +21,18 @@ namespace WebApi_gyakorlat.Controllers
         }
 
         // POST: api/Users
-        [HttpPost]
-        public async Task<ActionResult<CreateUserForm>> PostUser(CreateUserForm user)
+        [HttpPost("Register")]
+        public async Task<ActionResult<CreateUserForm>> RegisterUser(CreateUserForm user)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
+            var newUser = new ApplicationUser() { UserName = user.UserName};
+
             var result = await _userManager.CreateAsync(
-                new ApplicationUser() { UserName = user.UserName, Email = user.Email /*, Goal = user.Goal*/},
+                newUser,
                 user.Password
             );
 
@@ -42,8 +45,27 @@ namespace WebApi_gyakorlat.Controllers
             return CreatedAtAction(nameof(GetUser), new { userName = user.UserName }, user);
         }
 
+        // GET: api/Users
+        [HttpGet(nameof(GetAllUser))]
+        public async Task<ActionResult<List<UserDetails>>> GetAllUser()
+        {
+            var users = await _userManager.Users.ToListAsync();
+
+            List<UserDetails> userDetails = new();
+            foreach (var user in users)
+            {
+                userDetails.Add(new UserDetails
+                {
+                    UserName = user.UserName ?? string.Empty,
+                    Email = user.Email ?? string.Empty
+                });
+            }
+
+            return Ok(userDetails);
+        }
+
         // GET: api/Users/username
-        [HttpGet("{username}")]
+        [HttpGet(nameof(GetUser)+"/{username}")]
         public async Task<ActionResult<UserDetails>> GetUser(string username)
         {
             ApplicationUser? user = await _userManager.FindByNameAsync(username);
@@ -60,8 +82,9 @@ namespace WebApi_gyakorlat.Controllers
             };
         }
 
+
         // POST: api/Users/BearerToken
-        [HttpPost("BearerToken")]
+        [HttpPost("Login")]
         public async Task<ActionResult<AuthenticationResponse>> CreateBearerToken(AuthenticationRequest request)
         {
             if (!ModelState.IsValid)

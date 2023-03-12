@@ -12,8 +12,8 @@ using WebApi_gyakorlat.Models;
 namespace WebApi_gyakorlat.Migrations
 {
     [DbContext(typeof(GyakDbContext))]
-    [Migration("20230310120034_AddUserAndBook")]
-    partial class AddUserAndBook
+    [Migration("20230310163934_FromTheNullToMax01")]
+    partial class FromTheNullToMax01
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -126,10 +126,6 @@ namespace WebApi_gyakorlat.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -137,10 +133,6 @@ namespace WebApi_gyakorlat.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
@@ -156,10 +148,6 @@ namespace WebApi_gyakorlat.Migrations
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
@@ -180,8 +168,9 @@ namespace WebApi_gyakorlat.Migrations
 
             modelBuilder.Entity("WebApi_gyakorlat.Models.Book", b =>
                 {
-                    b.Property<string>("BookId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("BookId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Author")
                         .IsRequired()
@@ -195,14 +184,13 @@ namespace WebApi_gyakorlat.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("BookId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Book");
+                    b.ToTable("Books");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -236,9 +224,7 @@ namespace WebApi_gyakorlat.Migrations
                 {
                     b.HasOne("WebApi_gyakorlat.Models.ApplicationUser", "User")
                         .WithMany("Books")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });

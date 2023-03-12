@@ -15,6 +15,8 @@ namespace WebApi_gyakorlat
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddScoped<ITokenCreationService, JwtService>();
+            builder.Services.AddScoped<BookService>();
+
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                             .AddJwtBearer(options => {
                                 options.TokenValidationParameters = new TokenValidationParameters()
@@ -44,6 +46,7 @@ namespace WebApi_gyakorlat
                 options.Password.RequireLowercase = false;
             })
                             .AddEntityFrameworkStores<GyakDbContext>();
+
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

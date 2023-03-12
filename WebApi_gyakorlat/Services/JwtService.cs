@@ -46,7 +46,7 @@ namespace WebApi_gyakorlat.Services
                 signingCredentials: credentials
             );
 
-        private Claim[] CreateClaims(IdentityUser user) =>
+        private static Claim[] CreateClaims(IdentityUser user) =>
             new[] {
         new Claim(JwtRegisteredClaimNames.Sub, user.Id),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
